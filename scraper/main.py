@@ -54,14 +54,14 @@ class Scrapper:
         elif platform == Platforms.mastodon:
             return self.scrape_toot(url)
 
-    def scrape_batch(self, urls: List[str]) -> List[Tuple[str, str]]:
-        data = []
+    def scrape_batch(self, urls: List[str]) -> Dict[Tuple[str, str]]:
+        data = {}
         for index, url in enumerate(urls):
             try:
                 if index > 0 and self.get_platform(urls[index - 1]) == Platforms.mastodon and \
                         self.get_platform(urls[index]) == Platforms.mastodon:
                     time.sleep(1)
-                data.append(self.scrape(url))
+                data[url] = self.scrape(url)
             except Exception as e:
                 print(e)
                 continue

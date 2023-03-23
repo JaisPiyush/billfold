@@ -12,6 +12,8 @@ contract LynxWalletFactory {
     mapping(bytes32 => bool) private inMempool;
     // How many handles (eoa, social1, social2) have supported
     mapping(address => uint256) public handlesBackingCount;
+
+    mapping(address => bool) public lynxWallet;
  
     address public immutable executor;
 
@@ -63,12 +65,25 @@ contract LynxWalletFactory {
     function _createWallet(address eoa) internal {
         string[] memory handles = eoaMempoolSocialHandles[eoa];
         address wallet = address(new LynxWallet(eoa, executor, handles[0], handles[1]));
+        lynxWallet[wallet] = true;
         bytes32 username0Hash = keccak256(abi.encodePacked(handles[0]));
         bytes32 username1Hash = keccak256(abi.encodePacked(handles[1]));
         getLynxWalletForHandle[keccak256(abi.encodePacked(eoa))] = wallet;
         getLynxWalletForHandle[username0Hash] = wallet;
         getLynxWalletForHandle[username1Hash] = wallet;
+
+        // Reseting 
+        eoaMempoolSocialHandles[eoa] = new string[];
+        inMempool[username0Hash] = false;
+        inMempool[username1Hash] = false;
+        handlesBackingCount[eoa] = 0;
         emit LynxWalletCreated(wallet, block.number);
+    }
+
+    function updateEOAForLynxWallet(address prevEOA, address newEOA) external {
+        require(lynxWallet[msg.sender], "Only lynx wallet can update");
+        getLynxWalletForHandle[keccak256(abi.encodePacked(prevEOA))] = address(0);
+        getLynxWalletForHandle[keccak256(abi.encodePacked(newEOA))] = msg.sender;
     }
     
 

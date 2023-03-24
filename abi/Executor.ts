@@ -34,6 +34,7 @@ export interface ExecutorInterface extends utils.Interface {
     "isRegisterdExecutor(address)": FunctionFragment;
     "lynx_call(bytes32,bytes32,address,uint256,bytes)": FunctionFragment;
     "lynx_create(bytes32,address,string,uint8,bytes32,bytes32)": FunctionFragment;
+    "owner()": FunctionFragment;
     "registerExecutor(address)": FunctionFragment;
     "totalExecutors()": FunctionFragment;
   };
@@ -45,6 +46,7 @@ export interface ExecutorInterface extends utils.Interface {
       | "isRegisterdExecutor"
       | "lynx_call"
       | "lynx_create"
+      | "owner"
       | "registerExecutor"
       | "totalExecutors"
   ): FunctionFragment;
@@ -79,6 +81,7 @@ export interface ExecutorInterface extends utils.Interface {
       PromiseOrValue<BytesLike>
     ]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "registerExecutor",
     values: [PromiseOrValue<string>]
@@ -102,6 +105,7 @@ export interface ExecutorInterface extends utils.Interface {
     functionFragment: "lynx_create",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "registerExecutor",
     data: BytesLike
@@ -202,6 +206,8 @@ export interface Executor extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
     registerExecutor(
       exec: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -241,6 +247,8 @@ export interface Executor extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
   registerExecutor(
     exec: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -279,6 +287,8 @@ export interface Executor extends BaseContract {
       s: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     registerExecutor(
       exec: PromiseOrValue<string>,
@@ -340,6 +350,8 @@ export interface Executor extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
     registerExecutor(
       exec: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -379,6 +391,8 @@ export interface Executor extends BaseContract {
       s: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     registerExecutor(
       exec: PromiseOrValue<string>,

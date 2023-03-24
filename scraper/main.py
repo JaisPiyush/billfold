@@ -1,5 +1,4 @@
-from dataclasses import dataclass
-from typing import Optional, Dict, List, Tuple
+from typing import Dict, List, Tuple
 from enum import Enum
 # from scraper.utils import get_keccak_256
 import bs4
@@ -8,7 +7,7 @@ import requests
 import time
 import sqlite3
 from urllib3.util import url as urlutils
-
+import json
 
 class Platforms(Enum):
     twitter = 'twitter'
@@ -42,7 +41,7 @@ class Scrapper:
         tweet_id = Scrapper.get_id_from_url(url)
         tweets = TwitterTweetScraper(tweetId=tweet_id).get_items()
         tweet = next(tweets)
-        return tweet.rawContent, self.get_profile_url(Platforms.twitter, tweet.user.username)
+        return tweet.renderedContent, self.get_profile_url(Platforms.twitter, tweet.user.username)
 
     def scrape_toot(self, url: str) -> Tuple[str, str]:
         toot_id = Scrapper.get_id_from_url(url)
@@ -60,7 +59,7 @@ class Scrapper:
         elif platform == Platforms.mastodon:
             return self.scrape_toot(url)
 
-    def scrape_batch(self, urls: List[str]) -> Dict[Tuple[str, str]]:
+    def scrape_batch(self, urls: List[str]) -> Dict[str, Tuple[str, str]]:
         data = {}
         for index, url in enumerate(urls):
             try:
@@ -101,8 +100,8 @@ def main():
     drop_urls(cursor, list(fetched_data.keys()))
     conn.commit()
     conn.close()
-    return fetched_data
+    return json.dumps(fetched_data)
 
 
 if __name__ == '__main__':
-    main()
+    print(main())

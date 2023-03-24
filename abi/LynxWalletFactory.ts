@@ -34,7 +34,9 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
     "authenticateCreateRequest(address,string,uint8,bytes32,bytes32)": FunctionFragment;
     "create()": FunctionFragment;
     "executor()": FunctionFragment;
+    "flush(bytes32)": FunctionFragment;
     "getLynxWalletForHandle(bytes32)": FunctionFragment;
+    "getMessageHash(address,string)": FunctionFragment;
     "handlesBackingCount(address)": FunctionFragment;
     "lynxWallet(address)": FunctionFragment;
     "updateEOAForLynxWallet(address,address)": FunctionFragment;
@@ -47,7 +49,9 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
       | "authenticateCreateRequest"
       | "create"
       | "executor"
+      | "flush"
       | "getLynxWalletForHandle"
+      | "getMessageHash"
       | "handlesBackingCount"
       | "lynxWallet"
       | "updateEOAForLynxWallet"
@@ -74,8 +78,16 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "create", values?: undefined): string;
   encodeFunctionData(functionFragment: "executor", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "flush",
+    values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "getLynxWalletForHandle",
     values: [PromiseOrValue<BytesLike>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getMessageHash",
+    values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "handlesBackingCount",
@@ -104,8 +116,13 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "create", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "executor", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "flush", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "getLynxWalletForHandle",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getMessageHash",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -198,8 +215,19 @@ export interface LynxWalletFactory extends BaseContract {
 
     executor(overrides?: CallOverrides): Promise<[string]>;
 
+    flush(
+      sender: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     getLynxWalletForHandle(
       arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    getMessageHash(
+      eoa: PromiseOrValue<string>,
+      username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
@@ -239,8 +267,19 @@ export interface LynxWalletFactory extends BaseContract {
 
   executor(overrides?: CallOverrides): Promise<string>;
 
+  flush(
+    sender: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   getLynxWalletForHandle(
     arg0: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  getMessageHash(
+    eoa: PromiseOrValue<string>,
+    username: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -278,8 +317,19 @@ export interface LynxWalletFactory extends BaseContract {
 
     executor(overrides?: CallOverrides): Promise<string>;
 
+    flush(
+      sender: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     getLynxWalletForHandle(
       arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    getMessageHash(
+      eoa: PromiseOrValue<string>,
+      username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -342,8 +392,19 @@ export interface LynxWalletFactory extends BaseContract {
 
     executor(overrides?: CallOverrides): Promise<BigNumber>;
 
+    flush(
+      sender: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     getLynxWalletForHandle(
       arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    getMessageHash(
+      eoa: PromiseOrValue<string>,
+      username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -384,8 +445,19 @@ export interface LynxWalletFactory extends BaseContract {
 
     executor(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    flush(
+      sender: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     getLynxWalletForHandle(
       arg0: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getMessageHash(
+      eoa: PromiseOrValue<string>,
+      username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

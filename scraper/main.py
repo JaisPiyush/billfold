@@ -27,6 +27,12 @@ class Scrapper:
             return Platforms.mastodon
         raise ValueError('Unknown source')
 
+    def get_profile_url(self, platform: Platforms, id: str) -> str:
+        if Platforms.mastodon == platform:
+            return f"https://mastodon.social/@{id}"
+        elif Platforms.twitter == platform:
+            return f"https://twitter.com/{id}"
+
     @staticmethod
     def get_id_from_url(url: str) -> str:
         parsed_url = urlutils.parse_url(url)
@@ -36,7 +42,7 @@ class Scrapper:
         tweet_id = Scrapper.get_id_from_url(url)
         tweets = TwitterTweetScraper(tweetId=tweet_id).get_items()
         tweet = next(tweets)
-        return tweet.rawContent, tweet.user.username
+        return tweet.rawContent, self.get_profile_url(Platforms.twitter, tweet.user.username)
 
     def scrape_toot(self, url: str) -> Tuple[str, str]:
         toot_id = Scrapper.get_id_from_url(url)
@@ -45,7 +51,7 @@ class Scrapper:
             raise ValueError("no toot")
         res = r.json()
         soup = bs4.BeautifulSoup(res["content"], "lxml")
-        return soup.text, res["account"]["username"]
+        return soup.text, self.get_profile_url(Platforms.mastodon, res["account"]["username"])
 
     def scrape(self, url: str) -> Tuple[str, str]:
         platform = self.get_platform(url)

@@ -1,4 +1,4 @@
-# from dataclasses import dataclass
+from dataclasses import dataclass
 from typing import Optional, Dict, List, Tuple
 from enum import Enum
 # from scraper.utils import get_keccak_256
@@ -6,7 +6,7 @@ import bs4
 from snscrape.modules.twitter import TwitterTweetScraper
 import requests
 import time
-
+import sqlite3
 from urllib3.util import url as urlutils
 
 
@@ -72,3 +72,37 @@ class Scrapper:
                 print(e)
                 continue
         return data
+
+
+def get_connection() -> sqlite3.Connection:
+    return sqlite3.connect('db/mempool.db')
+
+
+def drop_urls(cursor: sqlite3.Cursor, urls: List[str]):
+
+    stred = str(urls).replace('[', '(').replace(']', ')')
+    stmt = f'DELETE FROM mempool WHERE url in {stred}'
+    cursor.execute(stmt)
+
+
+def get_all_urls_from_mempool(cursor: sqlite3.Cursor) -> List[str]:
+    statement = 'SELECT * FROM mempool'
+    cursor.execute(statement)
+    data = [row[0] for row in cursor.fetchall()]
+    return data
+
+
+def main():
+    scraper = Scrapper()
+    conn = get_connection()
+    cursor = conn.cursor()
+    urls = get_all_urls_from_mempool(cursor)
+    fetched_data = scraper.scrape_batch(urls)
+    drop_urls(cursor, list(fetched_data.keys()))
+    conn.commit()
+    conn.close()
+    return fetched_data
+
+
+if __name__ == '__main__':
+    main()

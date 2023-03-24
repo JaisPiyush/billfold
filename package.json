@@ -1,0 +1,9 @@
+{
+    "name": "lynx",
+    "type": "module",
+    "dependencies": {
+        "ethers": "5.7.2",
+        "@ethersproject/providers": "5.7.2",
+        "@ethersproject/abi": "5.7.0"
+    }
+}

@@ -6,7 +6,7 @@ import "./ILynxWalletFactory.sol";
 contract LynxWallet {
 
     event SpendingLimitUpdated(uint256 indexed spendingLimit, uint256 indexed timestamp);
-    event Transfer(address indexed to, bytes32 indexed sender, uint256 indexed amount);
+    event Transfer(address indexed to, uint256 indexed amount);
     event TwoFactorAuthMessageSubmitted(bytes32 indexed sender, uint256 indexed nonce, bytes32 indexed data);
     event ResetEOA(address indexed eoa, uint256 indexed timestamp);
 
@@ -67,7 +67,7 @@ contract LynxWallet {
     }
 
 
-    function _authenticateTwoFactor(bytes32 sender, bytes calldata data) internal returns(bool) {
+    function _authenticateTwoFactor(bytes32 sender, bytes memory data) internal returns(bool) {
         bytes32 encodedCallData = _encodeCallRequest(data);
         bytes32 twoFactorCallSubmittedKey = keccak256(abi.encodePacked(sender, nonce, data));
         require(!twoFactorCallSubmitted[twoFactorCallSubmittedKey], "Already submitted");
@@ -85,6 +85,7 @@ contract LynxWallet {
         }else {
             require(false, "Call execution completed");
         }
+        return false;
     }
 
     function getSender() internal view returns(bytes32){
@@ -95,24 +96,27 @@ contract LynxWallet {
     }
 
     // Update spending limit
-    function updateSpendingLimit(uint256 spendingLimit) external onlySender {
+    function updateSpendingLimit(uint256 spendingLimit) external onlySender returns(bool) {
         bytes32 sender = getSender();
         if(_authenticateTwoFactor(sender, msg.data)) {
             spendingLimitPerHandler = spendingLimit;
             emit SpendingLimitUpdated(spendingLimit, block.timestamp);
+            return true;
         }
+        return false;
 
     }
 
     // send function to send native currency
-    function send(address to, uint256 amount) external onlySender {
+    function send(address to, uint256 amount) external onlySender returns(bool) {
         bytes32 sender = getSender();
         if (amount <= spendingLimitPerHandler || _authenticateTwoFactor(sender, msg.data)){
             (bool success, ) = payable(to).call{value: amount}(new bytes(0));
             require(success, "Transfer failed");
-            emit Transfer(to, sender, amount);
-            return;
+            emit Transfer(to, amount);
+            return true;
         }
+        return false;
     }
 
     receive() external payable {}
@@ -121,12 +125,14 @@ contract LynxWallet {
 
     
     // Recover function to reset EOA
-    function recoverEOA(bytes32 sender, address newEOA) external onlyExecutor {
-        if (_authenticateTwoFactor(sender, msg.data)) {
+    function recoverEOA(bytes32 sender, address newEOA) external onlyExecutor returns(bool) {
+        if (_authenticateTwoFactor(sender, abi.encodePacked("recoverEOA", newEOA))) {
             ILynxWalletFactory(factory).updateEOAForLynxWallet(eoa, newEOA);
             eoa = newEOA;
             emit ResetEOA(newEOA, block.timestamp);
+            return true;
         }
+        return false;
     }
 
  

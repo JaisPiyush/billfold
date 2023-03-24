@@ -2,3 +2,4 @@ scrape-env
 db
 node_modules
 
+.env

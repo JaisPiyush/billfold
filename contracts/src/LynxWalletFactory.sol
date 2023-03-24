@@ -59,12 +59,15 @@ contract LynxWalletFactory {
         emit LynxWalletCreateRequest(addressHash, handlesBackingCount[msg.sender], block.number);
     }
 
+    function getMessageHash(address eoa, string memory username) public view returns(bytes32) {
+        return keccak256(abi.encodePacked(DOMAIN_SEPARATOR,CREATE_TYPEHASH, eoa, username));
+    }
+
     function _authenticateCreateRequest(address eoa, string memory username, uint8 v, bytes32 r, bytes32 s) internal view {
         bytes32 digest = keccak256(
             abi.encodePacked(
-                '\x19\x01',
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(CREATE_TYPEHASH, eoa, username))
+                '\x19Ethereum Signed Message:\n32',
+                keccak256(abi.encodePacked(DOMAIN_SEPARATOR,CREATE_TYPEHASH, eoa, username))
             )
         );
         address recoveredAddress = ecrecover(digest, v, r, s);

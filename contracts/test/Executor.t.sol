@@ -44,9 +44,8 @@ contract TestExecutor is Test {
 
         bytes32 digest = keccak256(
             abi.encodePacked(
-                '\x19\x01',
-                factory.DOMAIN_SEPARATOR(),
-                keccak256(abi.encode(factory.CREATE_TYPEHASH(), eoa, username))
+                '\x19Ethereum Signed Message:\n32',
+                keccak256(abi.encodePacked(factory.DOMAIN_SEPARATOR(),factory.CREATE_TYPEHASH(), eoa, username))
             )
         );
         return vm.sign(key, digest);

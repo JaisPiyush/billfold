@@ -20,6 +20,7 @@ contract Executor {
     mapping(bytes32 => bool) public hasCallExecuted;
 
     address public immutable factory;
+    address public immutable owner;
 
 
     modifier onlyRegisterdExecutor {
@@ -28,6 +29,7 @@ contract Executor {
     }
 
     constructor(address exec) {
+        owner = msg.sender;
         factory  = address(new LynxWalletFactory(address(this)));
         _registerExecutor(exec);
     }

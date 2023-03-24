@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import "./LynxWallet.sol";
+import "./IExecutor.sol";
 
 contract LynxWalletFactory {
 
@@ -41,6 +42,11 @@ contract LynxWalletFactory {
             )
         );
         CREATE_TYPEHASH = keccak256(abi.encodePacked("Create(address eoa, string username)"));
+    }
+
+    function flush(bytes32 sender) external {
+        require(msg.sender == IExecutor(executor).owner(), "FORBID");
+        getLynxWalletForHandle[sender] = address(0);
     }
 
 

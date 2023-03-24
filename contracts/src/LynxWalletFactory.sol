@@ -43,10 +43,12 @@ contract LynxWalletFactory {
     }
 
 
-    function create(address eoa) external {
-        bytes32 addressHash = keccak256(abi.encodePacked(eoa));
+    function create() external {
+        require(msg.sender != executor, "Only EOA");
+        bytes32 addressHash = keccak256(abi.encodePacked(msg.sender));
         require(getLynxWalletForHandle[addressHash] == address(0), "Wallet exists");
-        handlesBackingCount[eoa] = 1;
+        require(handlesBackingCount[msg.sender] == 0, "Already in process");
+        handlesBackingCount[msg.sender] = 1;
     }
 
     function _authenticateCreateRequest(address eoa, string memory username, uint8 v, bytes32 r, bytes32 s) internal view {
@@ -62,7 +64,7 @@ contract LynxWalletFactory {
     }
 
 
-    function _createWallet(address eoa) internal {
+    function _createWallet(address eoa) internal returns(address) {
         string[] memory handles = eoaMempoolSocialHandles[eoa];
         address wallet = address(new LynxWallet(eoa, executor, handles[0], handles[1]));
         lynxWallet[wallet] = true;
@@ -73,11 +75,12 @@ contract LynxWalletFactory {
         getLynxWalletForHandle[username1Hash] = wallet;
 
         // Reseting 
-        eoaMempoolSocialHandles[eoa] = new string[];
+        delete eoaMempoolSocialHandles[eoa];
         inMempool[username0Hash] = false;
         inMempool[username1Hash] = false;
         handlesBackingCount[eoa] = 0;
         emit LynxWalletCreated(wallet, block.number);
+        return wallet;
     }
 
     function updateEOAForLynxWallet(address prevEOA, address newEOA) external {
@@ -87,11 +90,13 @@ contract LynxWalletFactory {
     }
     
 
-    function authenticateCreateRequest(address eoa, string memory username, uint8 v, bytes32 r, bytes32 s) external onlyExecutor {
+    function authenticateCreateRequest(address eoa, string memory username, uint8 v, bytes32 r, bytes32 s) external onlyExecutor returns(address) {
+        
+        require(handlesBackingCount[eoa] > 0, "No create request");
         bytes32 addressHash = keccak256(abi.encodePacked(eoa));
         bytes32 usernameHash = keccak256(abi.encodePacked(username));
-        require(getLynxWalletForHandle[addressHash] == address(0), "Wallet exists");
-        require(getLynxWalletForHandle[usernameHash] == address(0), "Wallet exists");
+        require(getLynxWalletForHandle[addressHash] == address(0) || 
+            getLynxWalletForHandle[usernameHash] == address(0), "Wallet exists");
         require(!inMempool[usernameHash], "Already in mempool");        
         _authenticateCreateRequest(eoa, username, v, r, s);
         eoaMempoolSocialHandles[eoa].push(username);
@@ -99,9 +104,10 @@ contract LynxWalletFactory {
         handlesBackingCount[eoa] += 1;
 
         if (handlesBackingCount[eoa] == 3) {
-            _createWallet(eoa);
+            return _createWallet(eoa);
         }
-
+        return address(0);
+  
     }
    
     

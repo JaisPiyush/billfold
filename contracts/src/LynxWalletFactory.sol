@@ -5,6 +5,7 @@ import "./LynxWallet.sol";
 
 contract LynxWalletFactory {
 
+    event LynxWalletCreateRequest(bytes32 sender, uint256 indexed vote, uint256 indexed block);
     event LynxWalletCreated(address indexed walletAddress, uint256 indexed block);
     
     mapping(bytes32 => address) public getLynxWalletForHandle;
@@ -49,6 +50,7 @@ contract LynxWalletFactory {
         require(getLynxWalletForHandle[addressHash] == address(0), "Wallet exists");
         require(handlesBackingCount[msg.sender] == 0, "Already in process");
         handlesBackingCount[msg.sender] = 1;
+        emit LynxWalletCreateRequest(addressHash, handlesBackingCount[msg.sender], block.number);
     }
 
     function _authenticateCreateRequest(address eoa, string memory username, uint8 v, bytes32 r, bytes32 s) internal view {
@@ -102,7 +104,10 @@ contract LynxWalletFactory {
         eoaMempoolSocialHandles[eoa].push(username);
         inMempool[usernameHash] = true;
         handlesBackingCount[eoa] += 1;
-
+        emit LynxWalletCreateRequest(usernameHash, 
+            handlesBackingCount[eoa], 
+            block.number
+        );
         if (handlesBackingCount[eoa] == 3) {
             return _createWallet(eoa);
         }

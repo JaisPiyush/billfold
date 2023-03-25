@@ -3,6 +3,7 @@
     "dev": "deno run --watch main.ts",
     "compile": "deno run --allow-run scripts/compile.ts",
     "start:node": "deno run --allow-net --allow-env node/main.ts",
-    "start:exec": "deno run --allow-net --allow-env --allow-read --allow-write executor/main.ts"
+    "start:exec": "deno run --allow-net --allow-env --allow-read --allow-write executor/main.ts",
+    "cli": "deno run -A cli/main.ts"
   }
 }

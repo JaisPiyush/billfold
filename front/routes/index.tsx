@@ -1,24 +1,22 @@
 import { Head } from "$fresh/runtime.ts";
 import Counter from "../islands/Counter.tsx";
+import LoginView from "../islands/LoginView.tsx";
 
 export default function Home() {
   return (
     <>
       <Head>
-        <title>Fresh App</title>
+        <link rel="stylesheet" href="/global.css" />
+        <title>Lynx Wallet</title>
       </Head>
-      <div class="p-4 mx-auto max-w-screen-md">
-        <img
-          src="/logo.svg"
-          class="w-32 h-32"
-          alt="the fresh logo: a sliced lemon dripping with juice"
-        />
-        <p class="my-6">
-          Welcome to `fresh`. Try updating this message in the ./routes/index.tsx
-          file, and refresh.
-        </p>
-        <Counter start={3} />
-      </div>
+      <body class="p-0 m-0 w-screen text-white font-rubik h-screen bg-gray-200 flex flex-row justify-center">
+        <div class="h-full w-full max-w-5xl  flex flex-col">
+          <div class="h-16 w-full">01</div>
+          <div class="h-full w-full">
+            <LoginView />
+          </div>
+        </div>
+      </body>
     </>
   );
 }

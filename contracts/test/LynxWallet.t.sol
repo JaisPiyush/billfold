@@ -21,8 +21,8 @@ contract Demo {
 
 contract TestLynxWallet is Test {
 
-    event Transfer(address indexed to, uint256 indexed amount);
-    event ResetEOA(address indexed eoa, uint256 indexed timestamp);
+    event Transfer(address indexed from,address indexed to, uint256 indexed amount);
+    event ResetEOA(address indexed from,address indexed eoa, uint256 indexed timestamp);
 
     LynxWalletFactory private factory;
     Demo demo = new Demo();
@@ -66,7 +66,7 @@ contract TestLynxWallet is Test {
         uint256 value = 0.5 ether;
         address to = vm.addr(2);
         vm.expectEmit(true, true, true, false);
-        emit Transfer(to, value);
+        emit Transfer(address(wallet) , to, value);
         vm.prank(eoa);
         wallet.send(to, value);
         assertEq(address(to).balance, value);
@@ -91,7 +91,7 @@ contract TestLynxWallet is Test {
         bool transfered = wallet.send(to, value);
         assertEq(transfered, false);
         vm.expectEmit(true, true, true, false);
-        emit Transfer(to, value);
+        emit Transfer(address(wallet) , to, value);
         vm.prank(address(this));
         transfered = wallet.send(to,value);
         assertEq(transfered, true);
@@ -123,7 +123,7 @@ contract TestLynxWallet is Test {
         address newEOA = vm.addr(1000);
         wallet.recoverEOA(keccak256(abi.encodePacked(username1)), newEOA);
         vm.expectEmit(true, true, false, false);
-        emit ResetEOA(newEOA, block.timestamp);
+        emit ResetEOA(address(wallet) , newEOA, block.timestamp);
         wallet.recoverEOA(keccak256(abi.encodePacked(username2)), newEOA);
         assertEq(wallet.eoa(), newEOA);
     }

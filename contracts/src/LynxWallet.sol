@@ -5,10 +5,13 @@ import "./ILynxWalletFactory.sol";
 
 contract LynxWallet {
 
-    event SpendingLimitUpdated(uint256 indexed spendingLimit, uint256 indexed timestamp);
-    event Transfer(address indexed to, uint256 indexed amount);
-    event TwoFactorAuthMessageSubmitted(bytes32 indexed sender, uint256 indexed nonce, bytes32 indexed data);
-    event ResetEOA(address indexed eoa, uint256 indexed timestamp);
+    event SpendingLimitUpdated(address indexed from, uint256 indexed spendingLimit, uint256 indexed timestamp);
+    event Transfer(address indexed from, address indexed to, uint256 indexed amount);
+    event TwoFactorAuthMessageSubmitted(address indexed from, bytes32 indexed sender, uint256 indexed nonce, bytes32  data);
+    event ResetEOA(address indexed from, address indexed eoa, uint256 indexed timestamp);
+    event ExternalCall(
+        address indexed from, address indexed to, uint256 indexed value, bytes callData, bytes ret
+    );
 
     address public eoa;
 
@@ -75,12 +78,12 @@ contract LynxWallet {
         if (twoFactorCallCount[encodedCallData] == 1) {
             // Update and return true
             twoFactorCallCount[encodedCallData] = 2;
-            emit TwoFactorAuthMessageSubmitted(sender, nonce, encodedCallData);
+            emit TwoFactorAuthMessageSubmitted(address(this), sender, nonce, encodedCallData);
             nonce = nonce + 1;
             return true;
         }else if(twoFactorCallCount[encodedCallData] == 0) {
            twoFactorCallCount[encodedCallData] = 1;
-           emit TwoFactorAuthMessageSubmitted(sender, nonce, encodedCallData);
+           emit TwoFactorAuthMessageSubmitted(address(this),sender, nonce, encodedCallData);
            return false;
         }else {
             require(false, "Call execution completed");
@@ -100,7 +103,7 @@ contract LynxWallet {
         bytes32 sender = getSender();
         if(_authenticateTwoFactor(sender, msg.data)) {
             spendingLimitPerHandler = spendingLimit;
-            emit SpendingLimitUpdated(spendingLimit, block.timestamp);
+            emit SpendingLimitUpdated(address(this), spendingLimit, block.timestamp);
             return true;
         }
         return false;
@@ -113,7 +116,7 @@ contract LynxWallet {
         if (amount <= spendingLimitPerHandler || _authenticateTwoFactor(sender, msg.data)){
             (bool success, ) = payable(to).call{value: amount}(new bytes(0));
             require(success, "Transfer failed");
-            emit Transfer(to, amount);
+            emit Transfer(address(this), to, amount);
             return true;
         }
         return false;
@@ -129,7 +132,7 @@ contract LynxWallet {
         if (_authenticateTwoFactor(sender, abi.encodePacked("recoverEOA", newEOA))) {
             ILynxWalletFactory(factory).updateEOAForLynxWallet(eoa, newEOA);
             eoa = newEOA;
-            emit ResetEOA(newEOA, block.timestamp);
+            emit ResetEOA(address(this),newEOA, block.timestamp);
             return true;
         }
         return false;
@@ -143,6 +146,7 @@ contract LynxWallet {
         if (value <= spendingLimitPerHandler || _authenticateTwoFactor(sender, msg.data)){
             (bool success, bytes memory ret) = address(to).call{value: value}(data);
             require(success, "Call failed");
+            emit ExternalCall(address(this), to, value, msg.data, ret);
             return ret;
         }
         return new bytes(0);

@@ -5,6 +5,7 @@ import "https://deno.land/std@0.181.0/dotenv/load.ts";
 const port = 9090;
 
 const handler = async (request: Request): Promise<Response> => {
+  console.log(`${request.method} ${request.url}`);
   if (request.method != "POST") {
     const data = {
       executor: Deno.env.get("EXECUTOR_ADDRESS"),

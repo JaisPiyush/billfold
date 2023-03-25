@@ -139,12 +139,14 @@ export interface LynxWalletInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "ResetEOA(address,uint256)": EventFragment;
-    "SpendingLimitUpdated(uint256,uint256)": EventFragment;
-    "Transfer(address,uint256)": EventFragment;
-    "TwoFactorAuthMessageSubmitted(bytes32,uint256,bytes32)": EventFragment;
+    "ExternalCall(address,address,uint256,bytes,bytes)": EventFragment;
+    "ResetEOA(address,address,uint256)": EventFragment;
+    "SpendingLimitUpdated(address,uint256,uint256)": EventFragment;
+    "Transfer(address,address,uint256)": EventFragment;
+    "TwoFactorAuthMessageSubmitted(address,bytes32,uint256,bytes32)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "ExternalCall"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "ResetEOA"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SpendingLimitUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
@@ -153,23 +155,39 @@ export interface LynxWalletInterface extends utils.Interface {
   ): EventFragment;
 }
 
+export interface ExternalCallEventObject {
+  from: string;
+  to: string;
+  value: BigNumber;
+  callData: string;
+  ret: string;
+}
+export type ExternalCallEvent = TypedEvent<
+  [string, string, BigNumber, string, string],
+  ExternalCallEventObject
+>;
+
+export type ExternalCallEventFilter = TypedEventFilter<ExternalCallEvent>;
+
 export interface ResetEOAEventObject {
+  from: string;
   eoa: string;
   timestamp: BigNumber;
 }
 export type ResetEOAEvent = TypedEvent<
-  [string, BigNumber],
+  [string, string, BigNumber],
   ResetEOAEventObject
 >;
 
 export type ResetEOAEventFilter = TypedEventFilter<ResetEOAEvent>;
 
 export interface SpendingLimitUpdatedEventObject {
+  from: string;
   spendingLimit: BigNumber;
   timestamp: BigNumber;
 }
 export type SpendingLimitUpdatedEvent = TypedEvent<
-  [BigNumber, BigNumber],
+  [string, BigNumber, BigNumber],
   SpendingLimitUpdatedEventObject
 >;
 
@@ -177,23 +195,25 @@ export type SpendingLimitUpdatedEventFilter =
   TypedEventFilter<SpendingLimitUpdatedEvent>;
 
 export interface TransferEventObject {
+  from: string;
   to: string;
   amount: BigNumber;
 }
 export type TransferEvent = TypedEvent<
-  [string, BigNumber],
+  [string, string, BigNumber],
   TransferEventObject
 >;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface TwoFactorAuthMessageSubmittedEventObject {
+  from: string;
   sender: string;
-  nonce: BigNumber;
+  count: BigNumber;
   data: string;
 }
 export type TwoFactorAuthMessageSubmittedEvent = TypedEvent<
-  [string, BigNumber, string],
+  [string, string, BigNumber, string],
   TwoFactorAuthMessageSubmittedEventObject
 >;
 
@@ -366,42 +386,65 @@ export interface LynxWallet extends BaseContract {
   };
 
   filters: {
-    "ResetEOA(address,uint256)"(
+    "ExternalCall(address,address,uint256,bytes,bytes)"(
+      from?: PromiseOrValue<string> | null,
+      to?: PromiseOrValue<string> | null,
+      value?: PromiseOrValue<BigNumberish> | null,
+      callData?: null,
+      ret?: null
+    ): ExternalCallEventFilter;
+    ExternalCall(
+      from?: PromiseOrValue<string> | null,
+      to?: PromiseOrValue<string> | null,
+      value?: PromiseOrValue<BigNumberish> | null,
+      callData?: null,
+      ret?: null
+    ): ExternalCallEventFilter;
+
+    "ResetEOA(address,address,uint256)"(
+      from?: PromiseOrValue<string> | null,
       eoa?: PromiseOrValue<string> | null,
       timestamp?: PromiseOrValue<BigNumberish> | null
     ): ResetEOAEventFilter;
     ResetEOA(
+      from?: PromiseOrValue<string> | null,
       eoa?: PromiseOrValue<string> | null,
       timestamp?: PromiseOrValue<BigNumberish> | null
     ): ResetEOAEventFilter;
 
-    "SpendingLimitUpdated(uint256,uint256)"(
+    "SpendingLimitUpdated(address,uint256,uint256)"(
+      from?: PromiseOrValue<string> | null,
       spendingLimit?: PromiseOrValue<BigNumberish> | null,
       timestamp?: PromiseOrValue<BigNumberish> | null
     ): SpendingLimitUpdatedEventFilter;
     SpendingLimitUpdated(
+      from?: PromiseOrValue<string> | null,
       spendingLimit?: PromiseOrValue<BigNumberish> | null,
       timestamp?: PromiseOrValue<BigNumberish> | null
     ): SpendingLimitUpdatedEventFilter;
 
-    "Transfer(address,uint256)"(
+    "Transfer(address,address,uint256)"(
+      from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
       amount?: PromiseOrValue<BigNumberish> | null
     ): TransferEventFilter;
     Transfer(
+      from?: PromiseOrValue<string> | null,
       to?: PromiseOrValue<string> | null,
       amount?: PromiseOrValue<BigNumberish> | null
     ): TransferEventFilter;
 
-    "TwoFactorAuthMessageSubmitted(bytes32,uint256,bytes32)"(
+    "TwoFactorAuthMessageSubmitted(address,bytes32,uint256,bytes32)"(
+      from?: PromiseOrValue<string> | null,
       sender?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      data?: PromiseOrValue<BytesLike> | null
+      count?: PromiseOrValue<BigNumberish> | null,
+      data?: null
     ): TwoFactorAuthMessageSubmittedEventFilter;
     TwoFactorAuthMessageSubmitted(
+      from?: PromiseOrValue<string> | null,
       sender?: PromiseOrValue<BytesLike> | null,
-      nonce?: PromiseOrValue<BigNumberish> | null,
-      data?: PromiseOrValue<BytesLike> | null
+      count?: PromiseOrValue<BigNumberish> | null,
+      data?: null
     ): TwoFactorAuthMessageSubmittedEventFilter;
   };
 

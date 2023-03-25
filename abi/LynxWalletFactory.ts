@@ -136,8 +136,8 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
   ): Result;
 
   events: {
-    "LynxWalletCreateRequest(bytes32,uint256,uint256)": EventFragment;
-    "LynxWalletCreated(address,uint256)": EventFragment;
+    "LynxWalletCreateRequest(bytes32,bytes,uint256,uint256)": EventFragment;
+    "LynxWalletCreated(address,address,string,string,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "LynxWalletCreateRequest"): EventFragment;
@@ -146,11 +146,12 @@ export interface LynxWalletFactoryInterface extends utils.Interface {
 
 export interface LynxWalletCreateRequestEventObject {
   sender: string;
+  handle: string;
   vote: BigNumber;
   block: BigNumber;
 }
 export type LynxWalletCreateRequestEvent = TypedEvent<
-  [string, BigNumber, BigNumber],
+  [string, string, BigNumber, BigNumber],
   LynxWalletCreateRequestEventObject
 >;
 
@@ -159,10 +160,13 @@ export type LynxWalletCreateRequestEventFilter =
 
 export interface LynxWalletCreatedEventObject {
   walletAddress: string;
+  eoa: string;
+  handle1: string;
+  handle2: string;
   block: BigNumber;
 }
 export type LynxWalletCreatedEvent = TypedEvent<
-  [string, BigNumber],
+  [string, string, string, string, BigNumber],
   LynxWalletCreatedEventObject
 >;
 
@@ -351,24 +355,32 @@ export interface LynxWalletFactory extends BaseContract {
   };
 
   filters: {
-    "LynxWalletCreateRequest(bytes32,uint256,uint256)"(
+    "LynxWalletCreateRequest(bytes32,bytes,uint256,uint256)"(
       sender?: null,
+      handle?: null,
       vote?: PromiseOrValue<BigNumberish> | null,
       block?: PromiseOrValue<BigNumberish> | null
     ): LynxWalletCreateRequestEventFilter;
     LynxWalletCreateRequest(
       sender?: null,
+      handle?: null,
       vote?: PromiseOrValue<BigNumberish> | null,
       block?: PromiseOrValue<BigNumberish> | null
     ): LynxWalletCreateRequestEventFilter;
 
-    "LynxWalletCreated(address,uint256)"(
-      walletAddress?: PromiseOrValue<string> | null,
-      block?: PromiseOrValue<BigNumberish> | null
+    "LynxWalletCreated(address,address,string,string,uint256)"(
+      walletAddress?: null,
+      eoa?: PromiseOrValue<string> | null,
+      handle1?: PromiseOrValue<string> | null,
+      handle2?: PromiseOrValue<string> | null,
+      block?: null
     ): LynxWalletCreatedEventFilter;
     LynxWalletCreated(
-      walletAddress?: PromiseOrValue<string> | null,
-      block?: PromiseOrValue<BigNumberish> | null
+      walletAddress?: null,
+      eoa?: PromiseOrValue<string> | null,
+      handle1?: PromiseOrValue<string> | null,
+      handle2?: PromiseOrValue<string> | null,
+      block?: null
     ): LynxWalletCreatedEventFilter;
   };
 

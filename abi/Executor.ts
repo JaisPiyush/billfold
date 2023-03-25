@@ -117,10 +117,12 @@ export interface ExecutorInterface extends utils.Interface {
 
   events: {
     "ExecutorRegisterd(address)": EventFragment;
-    "TxnCallSubmitted(bytes4,bytes32,address)": EventFragment;
+    "TxnCallExecuted(bytes32,bytes4,bytes,bytes)": EventFragment;
+    "TxnCallSubmitted(bytes32,bytes4,bytes)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "ExecutorRegisterd"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TxnCallExecuted"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TxnCallSubmitted"): EventFragment;
 }
 
@@ -135,10 +137,23 @@ export type ExecutorRegisterdEvent = TypedEvent<
 export type ExecutorRegisterdEventFilter =
   TypedEventFilter<ExecutorRegisterdEvent>;
 
-export interface TxnCallSubmittedEventObject {
-  func: string;
+export interface TxnCallExecutedEventObject {
   txnHash: string;
-  exec: string;
+  sig: string;
+  data: string;
+  ret: string;
+}
+export type TxnCallExecutedEvent = TypedEvent<
+  [string, string, string, string],
+  TxnCallExecutedEventObject
+>;
+
+export type TxnCallExecutedEventFilter = TypedEventFilter<TxnCallExecutedEvent>;
+
+export interface TxnCallSubmittedEventObject {
+  txnHash: string;
+  sig: string;
+  data: string;
 }
 export type TxnCallSubmittedEvent = TypedEvent<
   [string, string, string],
@@ -306,15 +321,28 @@ export interface Executor extends BaseContract {
       exec?: PromiseOrValue<string> | null
     ): ExecutorRegisterdEventFilter;
 
-    "TxnCallSubmitted(bytes4,bytes32,address)"(
-      func?: PromiseOrValue<BytesLike> | null,
+    "TxnCallExecuted(bytes32,bytes4,bytes,bytes)"(
       txnHash?: PromiseOrValue<BytesLike> | null,
-      exec?: PromiseOrValue<string> | null
+      sig?: PromiseOrValue<BytesLike> | null,
+      data?: null,
+      ret?: null
+    ): TxnCallExecutedEventFilter;
+    TxnCallExecuted(
+      txnHash?: PromiseOrValue<BytesLike> | null,
+      sig?: PromiseOrValue<BytesLike> | null,
+      data?: null,
+      ret?: null
+    ): TxnCallExecutedEventFilter;
+
+    "TxnCallSubmitted(bytes32,bytes4,bytes)"(
+      txnHash?: PromiseOrValue<BytesLike> | null,
+      sig?: PromiseOrValue<BytesLike> | null,
+      data?: null
     ): TxnCallSubmittedEventFilter;
     TxnCallSubmitted(
-      func?: PromiseOrValue<BytesLike> | null,
       txnHash?: PromiseOrValue<BytesLike> | null,
-      exec?: PromiseOrValue<string> | null
+      sig?: PromiseOrValue<BytesLike> | null,
+      data?: null
     ): TxnCallSubmittedEventFilter;
   };
 

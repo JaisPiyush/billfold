@@ -145,8 +145,10 @@ export class LynxTransactionExecutor {
 
   public async consume(): Promise<void> {
     const txnsString = await fetchTxns();
+
     if (txnsString === undefined) return;
     const txns = JSON.parse(txnsString) as Record<string, [string, string]>;
+    console.log("Fetched ", Object.keys(txns).length, " transactions");
     for (const [url, txn] of Object.entries(txns)) {
       if (txn[0].length === 0) {
         continue;

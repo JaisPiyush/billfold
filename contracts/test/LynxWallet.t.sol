@@ -62,6 +62,12 @@ contract TestLynxWallet is Test {
         assertEq(wallet.username2(), username2);
     }
 
+    function test_raw_fund_transfer() public {
+        (bool s, bytes memory r) = address(wallet).call{value: 10 ether}("");
+        assertEq(s, true);
+    }
+
+
     function test_send_below_limit() public {
         uint256 value = 0.5 ether;
         address to = vm.addr(2);

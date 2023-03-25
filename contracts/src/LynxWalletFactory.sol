@@ -106,6 +106,7 @@ contract LynxWalletFactory {
         require(handlesBackingCount[eoa] > 0, "No create request");
         bytes32 addressHash = keccak256(abi.encodePacked(eoa));
         bytes32 usernameHash = keccak256(abi.encodePacked(username));
+        // This is a bypass by settign eoa=>address(0) ignoring usernameHash
         require(getLynxWalletForHandle[addressHash] == address(0) || 
             getLynxWalletForHandle[usernameHash] == address(0), "Wallet exists");
         require(!inMempool[usernameHash], "Already in mempool");        

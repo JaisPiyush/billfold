@@ -19,12 +19,17 @@ const handler = async (request: Request): Promise<Response> => {
       status: 200,
     });
   }
-  const data = await request.formData();
-  if (data.get("url") == undefined) {
+  try {
+    const data = JSON.parse(await request.text());
+
+    if (data["url"] == undefined) {
+      return new Response("Bad request", { status: 400 });
+    }
+    const url = data["url"] as string;
+    insertUrls([url]);
+  } catch (e) {
     return new Response("Bad request", { status: 400 });
   }
-  const url = data.get("url") as string;
-  insertUrls([url]);
   return new Response(undefined, { status: 200 });
 };
 

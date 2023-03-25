@@ -6,8 +6,8 @@ import "./IExecutor.sol";
 
 contract LynxWalletFactory {
 
-    event LynxWalletCreateRequest(bytes32 sender, uint256 indexed vote, uint256 indexed block);
-    event LynxWalletCreated(address indexed walletAddress, uint256 indexed block);
+    event LynxWalletCreateRequest(bytes32 sender, bytes handle, uint256 indexed vote, uint256 indexed block);
+    event LynxWalletCreated(address walletAddress, address indexed eoa, string indexed handle1, string indexed handle2, uint256 block);
     
     mapping(bytes32 => address) public getLynxWalletForHandle;
     mapping(address => string[]) private eoaMempoolSocialHandles;
@@ -56,7 +56,7 @@ contract LynxWalletFactory {
         require(getLynxWalletForHandle[addressHash] == address(0), "Wallet exists");
         require(handlesBackingCount[msg.sender] == 0, "Already in process");
         handlesBackingCount[msg.sender] = 1;
-        emit LynxWalletCreateRequest(addressHash, handlesBackingCount[msg.sender], block.number);
+        emit LynxWalletCreateRequest(addressHash, abi.encodePacked(msg.sender), handlesBackingCount[msg.sender], block.number);
     }
 
     function getMessageHash(address eoa, string memory username) public view returns(bytes32) {
@@ -90,7 +90,7 @@ contract LynxWalletFactory {
         inMempool[username0Hash] = false;
         inMempool[username1Hash] = false;
         handlesBackingCount[eoa] = 0;
-        emit LynxWalletCreated(wallet, block.number);
+        emit LynxWalletCreated(wallet,msg.sender,handles[0],handles[1], block.number);
         return wallet;
     }
 
@@ -114,7 +114,7 @@ contract LynxWalletFactory {
         eoaMempoolSocialHandles[eoa].push(username);
         inMempool[usernameHash] = true;
         handlesBackingCount[eoa] += 1;
-        emit LynxWalletCreateRequest(usernameHash, 
+        emit LynxWalletCreateRequest(usernameHash, abi.encode(username),
             handlesBackingCount[eoa], 
             block.number
         );

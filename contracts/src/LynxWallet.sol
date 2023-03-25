@@ -7,7 +7,7 @@ contract LynxWallet {
 
     event SpendingLimitUpdated(address indexed from, uint256 indexed spendingLimit, uint256 indexed timestamp);
     event Transfer(address indexed from, address indexed to, uint256 indexed amount);
-    event TwoFactorAuthMessageSubmitted(address indexed from, bytes32 indexed sender, uint256 indexed nonce, bytes32  data);
+    event TwoFactorAuthMessageSubmitted(address indexed from, bytes32 indexed sender, uint256 indexed count, bytes32  data);
     event ResetEOA(address indexed from, address indexed eoa, uint256 indexed timestamp);
     event ExternalCall(
         address indexed from, address indexed to, uint256 indexed value, bytes callData, bytes ret
@@ -78,12 +78,12 @@ contract LynxWallet {
         if (twoFactorCallCount[encodedCallData] == 1) {
             // Update and return true
             twoFactorCallCount[encodedCallData] = 2;
-            emit TwoFactorAuthMessageSubmitted(address(this), sender, nonce, encodedCallData);
+            emit TwoFactorAuthMessageSubmitted(address(this), sender, 2, encodedCallData);
             nonce = nonce + 1;
             return true;
         }else if(twoFactorCallCount[encodedCallData] == 0) {
            twoFactorCallCount[encodedCallData] = 1;
-           emit TwoFactorAuthMessageSubmitted(address(this),sender, nonce, encodedCallData);
+           emit TwoFactorAuthMessageSubmitted(address(this),sender, 1, encodedCallData);
            return false;
         }else {
             require(false, "Call execution completed");

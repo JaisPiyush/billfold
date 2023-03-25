@@ -7,9 +7,9 @@ import "../src/Executor.sol";
 contract TestExecutor is Test {
 
     event ExecutorRegisterd(address indexed exec);
-    event TxnCallSubmitted(bytes4 indexed func, bytes32 indexed txnHash, address indexed exec);
-    event LynxWalletCreateRequest(bytes32 sender, uint256 indexed vote, uint256 indexed block);
-    event LynxWalletCreated(address indexed walletAddress, uint256 indexed block);
+    event TxnCallSubmitted(bytes32 indexed txnHash, bytes4 indexed sig, bytes data);
+    event LynxWalletCreateRequest(bytes32 sender, bytes handle, uint256 indexed vote, uint256 indexed block);
+    event LynxWalletCreated(address walletAddress, address indexed eoa, string indexed handle1, string indexed handle2, uint256 block);
 
     Executor private executor;
     LynxWalletFactory private factory;
@@ -67,6 +67,7 @@ contract TestExecutor is Test {
         vm.expectEmit(true, true, true, false);
         emit LynxWalletCreateRequest(
             keccak256(abi.encodePacked(username1)),
+            abi.encode(username1),
             2, block.number
         );
         vm.prank(e2);
@@ -93,6 +94,7 @@ contract TestExecutor is Test {
         vm.expectEmit(true, true, true, false);
         emit LynxWalletCreateRequest(
             keccak256(abi.encodePacked(username1)),
+            abi.encode(username1),
             2, block.number
         );
         vm.prank(e2);
@@ -112,6 +114,7 @@ contract TestExecutor is Test {
         vm.expectEmit(true, true, true, false);
         emit LynxWalletCreateRequest(
             keccak256(abi.encodePacked(username2)),
+            abi.encode(username2),
             3, block.number
         );
         vm.prank(e2);

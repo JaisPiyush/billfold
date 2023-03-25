@@ -6,7 +6,8 @@ import "./ILynxWallet.sol";
 
 contract Executor {
 
-    event TxnCallSubmitted(bytes4 indexed func, bytes32 indexed txnHash, address indexed exec);
+    event TxnCallSubmitted(bytes32 indexed txnHash, bytes4 indexed sig, bytes data);
+    event TxnCallExecuted(bytes32 indexed txnHash, bytes4 indexed sig, bytes data, bytes ret);
     event ExecutorRegisterd(address indexed exec);
 
     mapping(address => bool) public isRegisterdExecutor;
@@ -58,7 +59,7 @@ contract Executor {
         require(!hasCallSubmitted[hasCallSubmittedKey], "Duplicate");
         hasCallSubmitted[hasCallSubmittedKey] = true;
         callSubmissionCount[callKey] += 1;
-        emit TxnCallSubmitted(sig, txnHash, msg.sender);
+        emit TxnCallSubmitted(txnHash, sig, data);
     }
 
 
@@ -68,6 +69,7 @@ contract Executor {
             if (_isPassingVoteCount(callSubmissionCount[callKey])) {
                 address wallet = LynxWalletFactory(factory).authenticateCreateRequest(eoa, username, v, r, s);
                 hasCallExecuted[callKey] = true;
+                emit TxnCallExecuted(txnHash, msg.sig, msg.data, abi.encode(wallet));
                 return wallet;
             }
             return address(0);
@@ -90,6 +92,7 @@ contract Executor {
                     success = true;
                 }
                 require(success, "Failed Lynx call");
+                emit TxnCallExecuted(txnHash, msg.sig, msg.data, ret);
                 return ret;
             }
             return new bytes(0);
